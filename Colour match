@@ -1,0 +1,90 @@
+// Include files for required libraries
+#include <stdio.h>
+#include "opencv_aee.hpp"
+#include "main.hpp"     // You can use this file for declaring defined values and functions
+
+void setup(void)
+{
+    /// Setup camera won't work if you don't have a compatible webcam
+    //setupCamera(320, 240);  // Enable the camera for OpenCV
+}
+
+int main( int argc, char** argv )
+{
+    setup();    // Call a setup function to prepare IO and devices
+
+    cv::namedWindow("Input Image");   // Create a GUI window called photo
+
+    while(1)    // Main loop to perform image processing
+    {
+        Mat Image, Image_HSV, Image_grey; // create mataces for the images to be held in
+        // Can't capture frames without a camera attached. Use static images instead
+        while(Image.empty())
+        {
+            /// Can't capture frames without a camera attached. Use static images instead
+            //frame = captureFrame(); // Capture a frame from the camera and store in a new matrix variable
+            Image = readImage("GreenApple.BMP");
+            //Please enter a BMP file or a PNG file
+        }
+
+        cvtColor(Image, Image_HSV, COLOR_BGR2HSV); // Convert the image to HSV
+
+        inRange(Image_HSV, Scalar(35, 68, 57), Scalar(73, 255, 255),Image_grey ); //Making the HSV grey scale for green
+
+        int greenpixels = 0; //Initialising the pixel count for green
+        greenpixels = countNonZero(Image_grey); //Counting how many green pixels are in the image
+
+        inRange(Image_HSV, Scalar(67, 48, 48), Scalar(123, 255, 255),Image_grey); //Making the HSV grey scale for blue
+
+        int bluepixels = 0; //Initialising the pixel count for blue
+        bluepixels = countNonZero(Image_grey); //Counting how many blue pixels are in the image
+
+        inRange(Image_HSV, Scalar(0, 48, 48), Scalar(45, 255, 255),Image_grey ); //Making the HSV grey scale for red
+
+        int redpixels = 0; //Initialising the pixel count for red
+        redpixels = countNonZero(Image_grey); //Counting how many red pixels are in the image
+
+
+        int yellowpixels = 0; //Initialising the pixel count for Yellow
+        yellowpixels = countNonZero(Image_grey); //Counting how many yellow pixels are in the image
+
+        if (redpixels > bluepixels && redpixels > greenpixels && redpixels > yellowpixels) //if red pixels are most common
+        {
+            inRange(Image_HSV, Scalar(0, 48, 48), Scalar(45, 255, 255),Image_grey );
+            cv::imshow("Input Image", Image_grey); //Display the image in the window
+            std::cout << "The object is red" << std::endl; //Display to user that the object is red
+        }
+        else if (bluepixels > greenpixels && bluepixels > redpixels && bluepixels > yellowpixels) //if blue pixels are most common
+        {
+            inRange(Image_HSV, Scalar(67, 48, 48), Scalar(123, 255, 255),Image_grey);
+            cv::imshow("Input Image", Image_grey); //Display the image in the window
+            std::cout << "The object is blue"<< std::endl; //Display to user that the object is blue
+        }
+        else if (greenpixels > bluepixels && greenpixels > redpixels && greenpixels > yellowpixels) //if green pixels are most common
+        {
+            inRange(Image_HSV, Scalar(35, 68, 57), Scalar(73, 255, 255),Image_grey );
+            cv::imshow("Input Image", Image_grey); //Display the image in the window
+            std::cout << "The object is green"<< std::endl; //Display to user that the object is green
+        }
+        else if (yellowpixels > bluepixels && yellowpixels > greenpixels && yellowpixels > redpixels) //if yellow pixels are most common
+        {
+            inRange(Image_HSV, Scalar(50, 48, 48), Scalar(70, 255, 255),Image_grey );
+            cv::imshow("Input Image", Image_grey); //Display the image in the window
+            std::cout << "The object is yellow"<< std::endl; //Display to user that the object is yellow
+        }
+
+
+        int key = cv::waitKey(1);   // Wait 1ms for a keypress (required to update windows)
+
+        key = (key==255) ? -1 : key;    // Check if the ESC key has been pressed
+        if (key == 27)
+            break;
+    }
+
+    closeCV();  // Disable the camera and close any windows
+
+    return 0;
+}
+
+
+
